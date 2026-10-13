@@ -3,8 +3,30 @@
     <ion-title>Guía de Restaurantes Euskadi</ion-title>
     <ion-buttons slot="end">
       <!-- Botón que llama al método cargarDatos() del componente -->
-      <ion-button (click)="cargarDatos()">
+       <!--DI02_TA02: deshabilitamos el botón durante las operaciones -->
+      <ion-button
+        (click)="cargarDatos()"
+        [disabled]="importando() || cargando()">
+
+        <!-- DI02_TA02: mostramos el spinner mientras se cargan los datos -->
+        @if (cargando()) {
+          <ion-spinner name="crescent" style="width:18px;height:18px;margin-right:6px;"></ion-spinner>
+        }
+
         Cargar datos
+      </ion-button>
+
+      <!-- DI02_TA02: botón para importar los datos del JSON -->
+      <ion-button
+        (click)="confirmarImportacion()"
+        [disabled]="importando() || cargando()">
+
+        <!-- DI02_TA02: mostramos el spinner mientras se importan los datos -->
+        @if (importando()) {
+          <ion-spinner name="crescent" style="width:18px;height:18px;margin-right:6px;"></ion-spinner>
+        }
+
+        IMPORTAR JSON
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
