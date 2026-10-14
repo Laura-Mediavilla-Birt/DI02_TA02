@@ -101,15 +101,18 @@ export class HomePage {
     let loading;
 
     try {
-      // DI02_TA02 - mostramos el indicador de importación
+      // DI02_TA02 - Mostramos el indicador mientras se borran los datos anteriores
       loading = await this.loadingCtrl.create({
-        message: 'Importando restaurantes a Firebase...',
+        message: 'Borrando datos anteriores...',
         backdropDismiss: false
       });
       await loading.present();
 
       // DI02_TA02 - eliminamos los documentos existentes
       await this.restauranteService.deleteAll();
+
+      // DI02_TA02 - Cambiamos el mensaje del indicador de carga
+      loading.message = 'Subiendo restaurantes...';
 
       // DI02_TA02 - guardamos los restaurantes del JSON en Firestore
       await this.restauranteService.addAll(this.restaurantes);
@@ -120,19 +123,11 @@ export class HomePage {
       );
     } catch (error: any) {
       // DI02_TA02 - mostramos los errores de importación
-      console.error('Error al importar los restaurantes:', error);
-
-      if (error?.code === 'permission-denied') {
-        await this.mostrarToast(
-          'No tienes permisos para modificar los datos de Firebase.',
-          'danger'
-        );
-      } else {
-        await this.mostrarToast(
-          'Se ha producido un error al importar los restaurantes.',
-          'danger'
-        );
-      }
+      console.error('Error al importar JSON:', error);
+      const msg = error?.code === 'permission-denied'
+        ? 'Sin permisos en Firebase. Revisa las reglas de seguridad.'
+        : 'Error al importar. Revisa tu conexión a internet.';
+      await this.mostrarToast(msg, 'danger');
     } finally {
       // DI02_TA02 - cerramos el indicador y restablecemos la señal
       if (loading) {
@@ -224,8 +219,11 @@ export class HomePage {
       const coincideTerritorio =
         !territorio || r.territory.toLowerCase().trim() === territorio;
 
+      
       const coincideLocalidad =
-        localidades.length === 0 || localidades.includes(r.locality);
+        localidades.length === 0 ||
+        localidades.includes(r.locality?.trim() || '');
+
 
       return coincideTexto && coincideTerritorio && coincideLocalidad;
     });
